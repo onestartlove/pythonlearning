@@ -1,7 +1,10 @@
 import re
 import requests
-import pandas as pd
 from bs4 import BeautifulSoup
+import pymysql
+
+db = pymysql.connect(host="localhost", user="root", password="root", database="test", charset="utf8mb4")
+cursor = db.cursor()
 
 url="https://jwch.fzu.edu.cn/jxtz.htm"
 url2="https://jwch.fzu.edu.cn"
@@ -97,18 +100,17 @@ for i in range ( start_number, start_number - 5, -1 ) :
                     'date' : date,
                     'author' : author,
                     'title' : title,
-                    'formatted_text' : formatted_text,
-                    'down_num' : '',
+                    'formatted_text'
+                    
                     'down_url' : '',
                     'attachment_name' : ''
                 } )
-    resp.close ()
 
-# 将数据转换为pandas DataFrame
-df = pd.DataFrame ( data_for_excel )
 
-# 将DataFrame存储为Excel文件
-excel_path = 'output.xlsx'
-df.to_excel ( excel_path, index=False )
-
-print ( f"Data has been written to {excel_path}" )
+ # 将数据存入数据库
+                insert_query = "INSERT INTO notices (href,  date, author,title,formatted_text,down_num,down_url, attachment_name) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+                cursor.execute(insert_query, (href,  date, author,title,formatted_text,attachments['down_num'],attachments['down_url'], attachments['attachment_name']))
+            resp.close ()
+# 提交并关闭连接
+db.commit()
+db.close()
